@@ -24,7 +24,8 @@ __ACTION_SEARCH__ = 'search'
 __ACTION_PLAY__ = 'play'
 
 __SETTING_SHOW_FANART__ = bromixbmc.Addon.getSetting('showFanart')=="true"
-__SETTING_SHOW_PUCLICATION_DATE__ = bromixbmc.Addon.getSetting('showPublicationDate')=="true"
+if not __SETTING_SHOW_FANART__:
+    __FANART__ = ''
 
 def _request(url_path, params={}):
     params['d'] = 'android-tablet'
@@ -94,7 +95,9 @@ def _listPosts(json_posts):
         
         custom_fields = post.get('custom_fields', None)
         if custom_fields!=None:
-            fanart = custom_fields.get('featured_img_all', [__FANART__])[0]
+            fanart = ''
+            if __SETTING_SHOW_FANART__:
+                fanart = custom_fields.get('featured_img_all', [__FANART__])[0]
             streaming = custom_fields.get('Streaming', None)
             if streaming!=None and len(streaming)>0:
                 streamId = streaming[0]

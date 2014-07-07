@@ -2,4 +2,7 @@
 <strings>
 	<!-- Global strings -->
 	<string id="30000">Suche</string>
+	
+	<!-- Settings -->
+	<string id="30500">Fanart anzeigen</string>
 </strings>
