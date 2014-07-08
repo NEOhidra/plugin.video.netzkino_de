@@ -12,6 +12,7 @@ Version 1.0.1 (2014.06.24)
 - initial release
 """
 
+import locale
 import re
 import sys
 import urlparse
@@ -29,3 +30,10 @@ def getParam(name, default=None):
         return value[0]
     
     return default
+
+def getLanguageId():
+    language = locale.getdefaultlocale()
+    if language and len(language)>=1:
+        return language[0].replace('_', '-')
+    
+    return None

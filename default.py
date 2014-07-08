@@ -26,9 +26,13 @@ if not __SETTING_SHOW_FANART__:
     __FANART__ = ''
 
 def _request(url_path, params={}):
+    language = bromixbmc.getLanguageId()
     params['d'] = 'android-tablet'
-    params['l'] = 'de-DE'
-    params['g'] = 'DE'
+    if language:
+        params['l'] = language
+        region = language.split('-')
+        if region and len(region)>=2:
+            params['g'] = region[1]
     
     result = {}
     
