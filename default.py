@@ -6,8 +6,8 @@ import json
 import urllib2
 import urllib
 
-#import pydevd
-#pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+import pydevd
+pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
 
@@ -145,7 +145,18 @@ def showCategory(id):
     __plugin__.endOfDirectory()
 
 def play(id):
-    url = 'http://netzkino_and-vh.akamaihd.net/i/'+id+'.mp4/master.m3u8'
+    streamer_url = 'http://netzkino_and-vh.akamaihd.net/i/'
+    
+    try:
+        response = urllib2.urlopen('http://www.netzkino.de/adconf/android-new.php')
+        result = json.load(response)
+        streamer_url = result.get('streamer', 'http://netzkino_and-vh.akamaihd.net/i/')
+    except:
+        # do nothing
+        pass
+    
+    
+    url = streamer_url+id+'.mp4/master.m3u8'
     __plugin__.setResolvedUrl(url)
     
 def search():
