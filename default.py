@@ -5,6 +5,7 @@ import xbmcgui
 import xbmcaddon
 
 import os
+import re
 import json
 import urllib2
 import urllib
@@ -51,7 +52,7 @@ def _request(url_path, params={}):
                          ('Host', 'api.netzkino.de.simplecache.net')]
     try:
         content = opener.open(url)
-        result = json.load(content)
+        result = json.load(content, encoding='utf-8')
     except:
         # do nothing
         pass
@@ -88,10 +89,16 @@ def showIndex():
     return True
 
 def _listPosts(json_posts):
+    def _getCleanPlot(plot):
+        result = re.sub('<[^<]+?>', '', plot)
+        return result
+    
+    xbmcplugin.setContent(bromixbmc.Addon.Handle, 'movies')
     for post in json_posts:
         id = post.get('id', None)
         name = post.get('title', None)
         thumbnailImage = post.get('thumbnail', '')
+        plot = _getCleanPlot(post.get('content', ''))
         
         custom_fields = post.get('custom_fields', None)
         if custom_fields!=None:
@@ -103,7 +110,29 @@ def _listPosts(json_posts):
                 streamId = streaming[0]
                 params = {'action': __ACTION_PLAY__,
                           'id': streamId}
-                bromixbmc.addVideoLink(name=name, params=params, thumbnailImage=thumbnailImage, fanart=fanart)
+                
+                additionalInfoLabels = {'plot': plot}
+                year = custom_fields.get('Jahr', [])
+                if len(year)>0:
+                    additionalInfoLabels['year'] = year[0]
+                    
+                cast = custom_fields.get('Stars', [])
+                if len(cast)>0:
+                    cast = cast[0].split(',')
+                    _cast = []
+                    for c in cast:
+                        _cast.append(c.strip())
+                    additionalInfoLabels['cast'] = _cast
+                    
+                director = custom_fields.get('Regisseur', [])
+                if len(director)>0:
+                    additionalInfoLabels['director'] = director[0]
+                    
+                rating = custom_fields.get('IMDb-Bewertung', ['0,0'])
+                if len(rating)>0:
+                    additionalInfoLabels['rating']=float(rating[0].replace(',', '.'))
+                
+                bromixbmc.addVideoLink(name=name, params=params, thumbnailImage=thumbnailImage, fanart=fanart, additionalInfoLabels=additionalInfoLabels)
 
 def showCategory(id):
     category = _request('/capi-2.0a/categories/'+id)
