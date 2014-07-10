@@ -20,8 +20,6 @@ import re
 import sys
 import urlparse
 
-import xbmc
-
 from plugin import Plugin
 from keyboard import Keyboard
 
