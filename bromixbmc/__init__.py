@@ -1,4 +1,7 @@
 """
+Version 2.0.2 (2014.07.10)
+- FIX: Android won't return a valid language so I added a default value 
+
 Version 2.0.1 (2014.07.08)
 - complete restructuring
 
@@ -17,6 +20,8 @@ import re
 import sys
 import urlparse
 
+import xbmc
+
 from plugin import Plugin
 from keyboard import Keyboard
 
@@ -31,9 +36,9 @@ def getParam(name, default=None):
     
     return default
 
-def getLanguageId():
+def getLanguageId(default='en-US'):
     language = locale.getdefaultlocale()
-    if language and len(language)>=1:
+    if language and len(language)>=1 and language[0]:
         return language[0].replace('_', '-')
     
-    return None
+    return default
