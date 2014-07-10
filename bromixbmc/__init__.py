@@ -37,8 +37,14 @@ def getParam(name, default=None):
     return default
 
 def getLanguageId(default='en-US'):
-    language = locale.getdefaultlocale()
-    if language and len(language)>=1 and language[0]:
-        return language[0].replace('_', '-')
+    result = default
     
-    return default
+    try:
+        language = locale.getdefaultlocale()
+        if language and len(language)>=1 and language[0]:
+            result = language[0].replace('_', '-')
+    except:
+        # do nothing
+        pass
+    
+    return result
