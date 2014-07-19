@@ -1,4 +1,14 @@
 """
+Version 2.0.5 (2014.07.19)
+- ADD: executebuiltin(function)
+- ADD: addSortMethod(sort_method) for add sorting
+
+Version 2.0.4 (2014.07.15)
+- ADD: decodeHtmlText(text) for decoding html escaped text
+
+Version 2.0.3 (2014.07.13)
+- ADD: getSettingAsInt
+
 Version 2.0.2 (2014.07.10)
 - FIX: Android won't return a valid language so I added a default value 
 
@@ -19,12 +29,29 @@ import locale
 import re
 import sys
 import urlparse
+import HTMLParser
+
+import xbmc
 
 from plugin import Plugin
 from keyboard import Keyboard
 
+def getFormatDateShort(year, month, day):
+    date_format = xbmc.getRegion('dateshort')
+    date_format = date_format.replace('%d', day)
+    date_format = date_format.replace('%m', month)
+    date_format = date_format.replace('%Y', year)
+    return date_format
+
+def executebuiltin(function):
+    xbmc.executebuiltin(function)
+
 def stripHtmlFromText(text):
     return re.sub('<[^<]+?>', '', text)
+
+def decodeHtmlText(text):
+    hp = HTMLParser.HTMLParser()
+    return hp.unescape(text)
 
 def getParam(name, default=None):
     args = urlparse.parse_qs(sys.argv[2][1:])

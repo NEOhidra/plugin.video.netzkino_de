@@ -10,6 +10,10 @@ import urllib
 #pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
+from bromixbmc.plugin import __SORT_METHOD_VIDEO_TITLE__,\
+    __SORT_METHOD_VIDEO_RATING__, __SORT_METHOD_VIDEO_YEAR__,\
+    __SORT_METHOD_VIDEO_RUNTIME__, __SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE__,\
+    __SORT_METHOD_DATEADDED__
 
 __plugin__ = bromixbmc.Plugin()
 
@@ -90,11 +94,18 @@ def showIndex():
 
 def _listPosts(json_posts):
     __plugin__.setContent('movies')
+    __plugin__.addSortMethod(__SORT_METHOD_VIDEO_TITLE__)
+    __plugin__.addSortMethod(__SORT_METHOD_VIDEO_RATING__)
+    __plugin__.addSortMethod(__SORT_METHOD_VIDEO_YEAR__)
+    #__plugin__.addSortMethod(__SORT_METHOD_VIDEO_RUNTIME__) not provided
+    __plugin__.addSortMethod(__SORT_METHOD_DATEADDED__)
+    
     for post in json_posts:
         id = post.get('id', None)
         name = post.get('title', None)
         thumbnailImage = post.get('thumbnail', '')
         plot = bromixbmc.stripHtmlFromText(post.get('content', ''))
+        date = post.get('date', '0000-00-00 00:00:00')
         
         custom_fields = post.get('custom_fields', None)
         if custom_fields:
@@ -107,7 +118,9 @@ def _listPosts(json_posts):
                 params = {'action': __ACTION_PLAY__,
                           'id': streamId}
                 
-                infoLabels = {'plot': plot}
+                infoLabels = {'plot': plot,
+                              'dateadded': date
+                              }
                 year = custom_fields.get('Jahr', [])
                 if len(year)>0:
                     infoLabels['year'] = year[0]
