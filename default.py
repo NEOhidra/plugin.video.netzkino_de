@@ -10,11 +10,6 @@ import urllib
 #pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
 
 import bromixbmc
-from bromixbmc.plugin import __SORT_METHOD_VIDEO_TITLE__,\
-    __SORT_METHOD_VIDEO_RATING__, __SORT_METHOD_VIDEO_YEAR__,\
-    __SORT_METHOD_VIDEO_RUNTIME__, __SORT_METHOD_VIDEO_SORT_TITLE_IGNORE_THE__,\
-    __SORT_METHOD_DATEADDED__
-
 __plugin__ = bromixbmc.Plugin()
 
 __FANART__ = os.path.join(__plugin__.getPath(), "fanart.jpg")
@@ -94,11 +89,11 @@ def showIndex():
 
 def _listPosts(json_posts):
     __plugin__.setContent('movies')
-    __plugin__.addSortMethod(__SORT_METHOD_VIDEO_TITLE__)
-    __plugin__.addSortMethod(__SORT_METHOD_VIDEO_RATING__)
-    __plugin__.addSortMethod(__SORT_METHOD_VIDEO_YEAR__)
-    #__plugin__.addSortMethod(__SORT_METHOD_VIDEO_RUNTIME__) not provided
-    __plugin__.addSortMethod(__SORT_METHOD_DATEADDED__)
+    __plugin__.addSortMethod(bromixbmc.plugin.__SORT_METHOD_VIDEO_TITLE__)
+    __plugin__.addSortMethod(bromixbmc.plugin.__SORT_METHOD_VIDEO_RATING__)
+    __plugin__.addSortMethod(bromixbmc.plugin.__SORT_METHOD_VIDEO_YEAR__)
+    #__plugin__.addSortMethod(bromixbmc.plugin.__SORT_METHOD_VIDEO_RUNTIME__) not provided
+    __plugin__.addSortMethod(bromixbmc.plugin.__SORT_METHOD_DATEADDED__)
     
     for post in json_posts:
         id = post.get('id', None)
