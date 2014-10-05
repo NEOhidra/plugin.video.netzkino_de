@@ -4,7 +4,7 @@ from resources.lib.kodimon.abstract_api import create_content_path
 __author__ = 'bromix'
 
 from resources.lib import kodimon
-from resources.lib.kodimon import constants
+from resources.lib.kodimon import constants, contextmenu
 
 
 class Provider(kodimon.AbstractProvider):
@@ -63,6 +63,10 @@ class Provider(kodimon.AbstractProvider):
             plot = kodimon.strip_html_from_text(post['content'])
             movie_item.set_plot(plot)
 
+            ctx_menu = [contextmenu.create_add_to_watch_later(self._plugin,
+                                                              self.LOCAL_WATCH_LATER,
+                                                              movie_item)]
+            movie_item.set_context_menu(ctx_menu)
             result.append(movie_item)
             pass
 
@@ -70,6 +74,15 @@ class Provider(kodimon.AbstractProvider):
 
     def on_root(self, path, params, re_match):
         result = []
+
+        # watch later
+        if len(self._watch_later.list()) > 0:
+            watch_later_item = DirectoryItem('[B]'+self.localize(self.LOCAL_WATCH_LATER)+'[/B]',
+                                             create_content_path(self.PATH_WATCH_LATER, 'list'),
+                                             image=self.create_resource_path('media', 'watch_later.png'))
+            watch_later_item.set_fanart(self._plugin.get_fanart())
+            result.append(watch_later_item)
+            pass
 
         # search
         search_item = DirectoryItem('[B]'+self.localize(self.LOCAL_SEARCH)+'[/B]',
