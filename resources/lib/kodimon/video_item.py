@@ -39,15 +39,7 @@ class VideoItem(BaseItem):
     INFO_TRAILER = ('trailer', unicode)
 
     def __init__(self, name, path, params=None, image=u''):
-        if not params:
-            params = {}
-            pass
         BaseItem.__init__(self, name, path, params, image)
-
-        """
-        Set some default values.
-        """
-        self.set_info(self.INFO_DURATION, u'1')
         pass
 
     def set_aired(self, year, month, day):

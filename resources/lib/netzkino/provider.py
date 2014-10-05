@@ -79,7 +79,17 @@ class Provider(kodimon.AbstractProvider):
         movie_item.set_context_menu(ctx_menu)
         return movie_item
 
+    def _set_content_and_sort(self):
+        self.set_content_type(constants.CONTENT_TYPE_MOVIES)
+        self.add_sort_method(constants.SORT_METHOD_LABEL_IGNORE_THE,
+                             constants.SORT_METHOD_VIDEO_YEAR,
+                             constants.SORT_METHOD_VIDEO_RATING,
+                             constants.SORT_METHOD_DATE)
+        pass
+
     def on_search(self, search_text, path, params, re_match):
+        self._set_content_and_sort()
+
         result = []
 
         json_data = self._client.search(search_text)
@@ -89,6 +99,10 @@ class Provider(kodimon.AbstractProvider):
             pass
 
         return result, {self.RESULT_CACHE_TO_DISC: False}
+
+    def on_watch_later(self, path, params, re_match):
+        self._set_content_and_sort()
+        pass
 
     @kodimon.RegisterPath('^/play/?$')
     def _on_play(self, path, params, re_match):
@@ -102,9 +116,7 @@ class Provider(kodimon.AbstractProvider):
 
     @kodimon.RegisterPath('^/category/(?P<categoryid>\d+)/?$')
     def _on_category(self, path, params, re_match):
-
-
-        self.set_content_type(constants.CONTENT_TYPE_MOVIES)
+        self._set_content_and_sort()
 
         result = []
         category_id = re_match.group('categoryid')
