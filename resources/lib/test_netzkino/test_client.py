@@ -7,6 +7,13 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_get_video_url(self):
+        client = Client()
+        url = client.get_video_url('some_id')
+
+        self.assertEqual(u'http://netzkino_and-vh.akamaihd.net/i/some_id.mp4/master.m3u8', url)
+        pass
+
     def test_get_category_content(self):
         client = Client()
 

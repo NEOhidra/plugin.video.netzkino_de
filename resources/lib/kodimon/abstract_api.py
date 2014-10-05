@@ -248,3 +248,12 @@ def create_url_from_item(plugin, base_item):
     :return:
     """
     return create_plugin_url(plugin, base_item.get_path(), base_item.get_params())
+
+
+def strip_html_from_text(text):
+    """
+    Returns a html free text
+    :param text: text with html tags
+    :return:
+    """
+    return re.sub('<[^<]+?>', '', text)

@@ -15,6 +15,16 @@ class Provider(kodimon.AbstractProvider):
         self._client = Client()
         pass
 
+    @kodimon.RegisterPath('^/play/?$')
+    def _on_play(self, path, params, re_match):
+        stream_id = params['stream_id']
+
+        stream_url = self._client.get_video_url(stream_id)
+        movie_item = VideoItem(stream_id,
+                               create_content_path('play', stream_id))
+        movie_item.set_url(stream_url)
+        return movie_item
+
     @kodimon.RegisterPath('^/category/(?P<categoryid>\d+)/?$')
     def _on_category(self, path, params, re_match):
         def _read_custom_fields(_post, field_name):
@@ -32,8 +42,10 @@ class Provider(kodimon.AbstractProvider):
         json_data = self._client.get_category_content(category_id)
         posts = json_data['posts']
         for post in posts:
+            stream_id = _read_custom_fields(post, 'Streaming')
             movie_item = VideoItem(post['title'],
-                                   create_content_path('play', str(post['id'])),
+                                   create_content_path('play'),
+                                   params={'stream_id': stream_id},
                                    image=post['thumbnail'])
 
             # year
@@ -43,7 +55,13 @@ class Provider(kodimon.AbstractProvider):
                 year = year.split('/')[0]
                 movie_item.set_year(year)
                 pass
+
+            # fanart
             movie_item.set_fanart(_read_custom_fields(post, 'featured_img_all'))
+
+            # plot
+            plot = kodimon.strip_html_from_text(post['content'])
+            movie_item.set_plot(plot)
 
             result.append(movie_item)
             pass

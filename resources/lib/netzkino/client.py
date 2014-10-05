@@ -63,4 +63,15 @@ class Client(object):
         return self._execute('categories/%s' % str(category_id))
         pass
 
+    def get_video_url(self, stream_id):
+        """
+        Returns the url for the given id
+        :param stream_id:
+        :return:
+        """
+        content = urllib2.urlopen('http://www.netzkino.de/adconf/android-new.php')
+        json_data = json.load(content)
+        streamer_url = json_data.get('streamer', 'http://netzkino_and-vh.akamaihd.net/i/')
+        return streamer_url+stream_id+'.mp4/master.m3u8'
+
     pass

@@ -92,4 +92,7 @@ class VideoItem(BaseItem):
         self.set_info(self.INFO_PREMIERED, date_str)
         pass
 
+    def set_plot(self, plot):
+        self.set_info(self.INFO_PLOT, plot)
+
     pass
