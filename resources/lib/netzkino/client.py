@@ -54,4 +54,13 @@ class Client(object):
         json_data = self.get_home()
         return json_data.get('categories', {})
 
+    def get_category_content(self, category_id):
+        """
+        Returns the content of the given category
+        :param category_id:
+        :return:
+        """
+        return self._execute('categories/%s' % str(category_id))
+        pass
+
     pass

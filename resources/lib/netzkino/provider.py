@@ -1,4 +1,4 @@
-from resources.lib.kodimon import DirectoryItem
+from resources.lib.kodimon import DirectoryItem, VideoItem
 from resources.lib.kodimon.abstract_api import create_content_path
 
 __author__ = 'bromix'
@@ -13,6 +13,28 @@ class Provider(kodimon.AbstractProvider):
         from . import Client
         self._client = Client()
         pass
+
+    @kodimon.RegisterPath('^/category/(?P<categoryid>\d+)/?$')
+    def _on_category(self, path, params, re_match):
+        result = []
+        category_id = re_match.group('categoryid')
+
+        json_data = self._client.get_category_content(category_id)
+        posts = json_data['posts']
+        for post in posts:
+            movie_item = VideoItem(post['title'],
+                                   create_content_path('play', str(post['id'])),
+                                   image=post['thumbnail'])
+            custom_fields = post.get('custom_fields', {})
+            featured_img_all = custom_fields.get('featured_img_all', [])
+            if len(featured_img_all)>=1:
+                movie_item.set_fanart(featured_img_all[0])
+                pass
+
+            result.append(movie_item)
+            pass
+
+        return result
 
     def on_root(self, path, params, re_match):
         result = []
