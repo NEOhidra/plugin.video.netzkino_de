@@ -21,6 +21,7 @@ class AbstractProvider(object):
     LOCAL_ARCHIVE = 'kodimon.archive'
     LOCAL_NEXT_PAGE = 'kodimon.next_page'
     LOCAL_WATCH_LATER = 'kodimon.watch_later'
+    LOCAL_WATCH_LATER_ADD = 'kodimon.watch_later.add'
     LOCAL_WATCH_LATER_REMOVE = 'kodimon.watch_later.remove'
     LOCAL_LATEST_VIDEOS = 'kodimon.latest_videos'
 
@@ -92,6 +93,7 @@ class AbstractProvider(object):
                                self.LOCAL_ARCHIVE: 30105,
                                self.LOCAL_NEXT_PAGE: 30106,
                                self.LOCAL_WATCH_LATER: 30107,
+                               self.LOCAL_WATCH_LATER_ADD: 30107,
                                self.LOCAL_WATCH_LATER_REMOVE: 30108,
                                self.LOCAL_LATEST_VIDEOS: 30109})
         pass
@@ -274,9 +276,7 @@ class AbstractProvider(object):
 
             fav_item = json_to_item(params['item'])
             self._favorites.remove(fav_item)
-            from . import refresh_container
-
-            refresh_container()
+            self.refresh_container()
             pass
         elif command == 'list':
             import contextmenu
@@ -319,9 +319,7 @@ class AbstractProvider(object):
 
             item = json_to_item(params['item'])
             self._watch_later.remove(item)
-            from . import refresh_container
-
-            refresh_container()
+            self.refresh_container()
             pass
         elif command == 'list':
             video_items = self._watch_later.list()

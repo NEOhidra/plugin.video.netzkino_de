@@ -64,7 +64,7 @@ class Provider(kodimon.AbstractProvider):
             movie_item.set_plot(plot)
 
             ctx_menu = [contextmenu.create_add_to_watch_later(self._plugin,
-                                                              self.LOCAL_WATCH_LATER,
+                                                              self.LOCAL_WATCH_LATER_ADD,
                                                               movie_item)]
             movie_item.set_context_menu(ctx_menu)
             result.append(movie_item)
