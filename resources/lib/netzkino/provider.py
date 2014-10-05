@@ -15,6 +15,52 @@ class Provider(kodimon.AbstractProvider):
         self._client = Client()
         pass
 
+    def _create_video_item_from_post(self, post):
+        def _read_custom_fields(_post, field_name):
+            custom_fields = post.get('custom_fields', {})
+            field = custom_fields.get(field_name, [])
+            if len(field) >= 1:
+                return field[0]
+            return u''
+
+        stream_id = _read_custom_fields(post, 'Streaming')
+        movie_item = VideoItem(post['title'],
+                               create_content_path('play'),
+                               params={'stream_id': stream_id},
+                               image=post['thumbnail'])
+
+        # year
+        year = _read_custom_fields(post, 'Jahr')
+        if year:
+            # There was one case with '2006/2012' as a result. Therefore we split every year.
+            year = year.split('/')[0]
+            movie_item.set_year(year)
+            pass
+
+        # fanart
+        movie_item.set_fanart(_read_custom_fields(post, 'featured_img_all'))
+
+        # plot
+        plot = kodimon.strip_html_from_text(post['content'])
+        movie_item.set_plot(plot)
+
+        ctx_menu = [contextmenu.create_add_to_watch_later(self._plugin,
+                                                          self.localize(self.LOCAL_WATCH_LATER_ADD),
+                                                          movie_item)]
+        movie_item.set_context_menu(ctx_menu)
+        return movie_item
+
+    def on_search(self, search_text, path, params, re_match):
+        result = []
+
+        json_data = self._client.search(search_text)
+        posts = json_data['posts']
+        for post in posts:
+            result.append(self._create_video_item_from_post(post))
+            pass
+
+        return result, {self.RESULT_CACHE_TO_DISC: False}
+
     @kodimon.RegisterPath('^/play/?$')
     def _on_play(self, path, params, re_match):
         stream_id = params['stream_id']
@@ -27,12 +73,7 @@ class Provider(kodimon.AbstractProvider):
 
     @kodimon.RegisterPath('^/category/(?P<categoryid>\d+)/?$')
     def _on_category(self, path, params, re_match):
-        def _read_custom_fields(_post, field_name):
-            custom_fields = post.get('custom_fields', {})
-            field = custom_fields.get(field_name, [])
-            if len(field) >= 1:
-                return field[0]
-            return u''
+
 
         self.set_content_type(constants.CONTENT_TYPE_MOVIES)
 
@@ -42,32 +83,7 @@ class Provider(kodimon.AbstractProvider):
         json_data = self._client.get_category_content(category_id)
         posts = json_data['posts']
         for post in posts:
-            stream_id = _read_custom_fields(post, 'Streaming')
-            movie_item = VideoItem(post['title'],
-                                   create_content_path('play'),
-                                   params={'stream_id': stream_id},
-                                   image=post['thumbnail'])
-
-            # year
-            year = _read_custom_fields(post, 'Jahr')
-            if year:
-                # There was one case with '2006/2012' as a result. Therefore we split every year.
-                year = year.split('/')[0]
-                movie_item.set_year(year)
-                pass
-
-            # fanart
-            movie_item.set_fanart(_read_custom_fields(post, 'featured_img_all'))
-
-            # plot
-            plot = kodimon.strip_html_from_text(post['content'])
-            movie_item.set_plot(plot)
-
-            ctx_menu = [contextmenu.create_add_to_watch_later(self._plugin,
-                                                              self.localize(self.LOCAL_WATCH_LATER_ADD),
-                                                              movie_item)]
-            movie_item.set_context_menu(ctx_menu)
-            result.append(movie_item)
+            result.append(self._create_video_item_from_post(post))
             pass
 
         return result

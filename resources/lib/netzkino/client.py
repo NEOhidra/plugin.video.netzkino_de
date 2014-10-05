@@ -63,6 +63,14 @@ class Client(object):
         return self._execute('categories/%s' % str(category_id))
         pass
 
+    def search(self, text):
+        """
+        Search the given text
+        :param text:
+        :return:
+        """
+        return self._execute('search', params={'q': text})
+
     def get_video_url(self, stream_id):
         """
         Returns the url for the given id

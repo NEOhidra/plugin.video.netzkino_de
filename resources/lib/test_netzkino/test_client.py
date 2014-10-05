@@ -7,6 +7,24 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_search(self):
+        client = Client()
+        json_data = client.search('Der Schlachter')
+
+        # at least 1 ore more items
+        self.assertGreater(len(json_data), 1)
+
+        posts = json_data['posts']
+        print "Found '%d' movies" % len(posts)
+        print '====================='
+        for post in posts:
+            print "Title: %s" % post['title']
+            print "Id   : %d" % post['id']
+            print '---------------------'
+            pass
+        pass
+        pass
+
     def test_get_video_url(self):
         client = Client()
         url = client.get_video_url('some_id')
