@@ -1,9 +1,11 @@
+from functools import partial
 from resources.lib.kodimon import DirectoryItem, VideoItem
 from resources.lib.kodimon.abstract_api import create_content_path
 
 __author__ = 'bromix'
 
 from resources.lib import kodimon
+from resources.lib.kodimon.helper import FunctionCache
 from resources.lib.kodimon import constants, contextmenu
 
 
@@ -92,7 +94,7 @@ class Provider(kodimon.AbstractProvider):
 
         result = []
 
-        json_data = self._client.search(search_text)
+        json_data = self.call_function_cached(partial(self._client.search, search_text), FunctionCache.ONE_MINUTE)
         posts = json_data['posts']
         for post in posts:
             result.append(self._create_video_item_from_post(post))
@@ -121,7 +123,7 @@ class Provider(kodimon.AbstractProvider):
         result = []
         category_id = re_match.group('categoryid')
 
-        json_data = self._client.get_category_content(category_id)
+        json_data = self.call_function_cached(partial(self._client.get_category_content, category_id), FunctionCache.ONE_DAY)
         posts = json_data['posts']
         for post in posts:
             result.append(self._create_video_item_from_post(post))
@@ -150,7 +152,7 @@ class Provider(kodimon.AbstractProvider):
         result.append(search_item)
 
         # categories
-        categories = self._client.get_categories()
+        categories = self.call_function_cached(partial(self._client.get_categories), FunctionCache.ONE_DAY)
         for category in categories:
             category_id = str(category['id'])
             image = 'http://dyn.netzkino.de/wp-content/themes/netzkino/imgs/categories/%s.png' % category_id
