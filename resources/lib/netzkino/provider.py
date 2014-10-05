@@ -29,10 +29,19 @@ class Provider(kodimon.AbstractProvider):
                                params={'stream_id': stream_id},
                                image=post['thumbnail'])
 
+        # stars
+        stars =  _read_custom_fields(post, 'Stars')
+        if stars:
+            stars = stars.split(',')
+            for star in stars:
+                movie_item.add_cast(star.strip())
+                pass
+            pass
+
         # director
         director = _read_custom_fields(post, 'Regisseur')
         if director:
-            movie_item.set_director(director)
+            movie_item.set_director(director.strip())
             pass
 
         # imdb

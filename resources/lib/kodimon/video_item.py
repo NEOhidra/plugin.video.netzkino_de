@@ -105,6 +105,16 @@ class VideoItem(BaseItem):
         self.set_info(self.INFO_DIRECTOR, director_name)
         pass
 
+    def add_cast(self, cast):
+        cast_list = self.get_info(self.INFO_CAST)
+        if not cast_list:
+            cast_list = []
+            pass
+
+        cast_list.append(cast)
+        self.set_info(self.INFO_CAST, cast_list)
+        pass
+
     def set_imdb_id(self, url_or_id):
         re_match = re.match('(http\:\/\/)?www.imdb.(com|de)\/title\/(?P<imdbid>[t0-9]+)(\/)?', url_or_id)
         if re_match:
