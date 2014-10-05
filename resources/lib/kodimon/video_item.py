@@ -1,3 +1,4 @@
+import re
 from .base_item import BaseItem
 
 
@@ -94,5 +95,18 @@ class VideoItem(BaseItem):
 
     def set_plot(self, plot):
         self.set_info(self.INFO_PLOT, plot)
+        pass
+
+    def set_rating(self, rating):
+        self.set_info(self.INFO_RATING, rating)
+        pass
+
+    def set_imdb_id(self, url_or_id):
+        re_match = re.match('(http\:\/\/)?www.imdb.(com|de)\/title\/(?P<imdbid>[t0-9]+)(\/)?', url_or_id)
+        if re_match:
+            self.set_info(self.INFO_CODE, re_match.group('imdbid'))
+        else:
+            self.set_info(self.INFO_CODE, url_or_id)
+        pass
 
     pass

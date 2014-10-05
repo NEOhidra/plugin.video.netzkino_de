@@ -29,6 +29,19 @@ class Provider(kodimon.AbstractProvider):
                                params={'stream_id': stream_id},
                                image=post['thumbnail'])
 
+        # imdb
+        imdb = _read_custom_fields(post, 'IMDb-Link')
+        if imdb:
+            movie_item.set_imdb_id(imdb)
+            pass
+
+        # rating
+        rating = _read_custom_fields(post, 'IMDb-Bewertung')
+        if rating:
+            rating = rating.replace(',', '.')
+            movie_item.set_rating(rating)
+            pass
+
         # year
         year = _read_custom_fields(post, 'Jahr')
         if year:
@@ -44,6 +57,7 @@ class Provider(kodimon.AbstractProvider):
         plot = kodimon.strip_html_from_text(post['content'])
         movie_item.set_plot(plot)
 
+        # context menu
         ctx_menu = [contextmenu.create_add_to_watch_later(self._plugin,
                                                           self.localize(self.LOCAL_WATCH_LATER_ADD),
                                                           movie_item)]
