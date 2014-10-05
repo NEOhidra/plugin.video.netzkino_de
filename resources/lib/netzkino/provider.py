@@ -4,6 +4,7 @@ from resources.lib.kodimon.abstract_api import create_content_path
 __author__ = 'bromix'
 
 from resources.lib import kodimon
+from resources.lib.kodimon import constants
 
 
 class Provider(kodimon.AbstractProvider):
@@ -16,6 +17,15 @@ class Provider(kodimon.AbstractProvider):
 
     @kodimon.RegisterPath('^/category/(?P<categoryid>\d+)/?$')
     def _on_category(self, path, params, re_match):
+        def _read_custom_fields(_post, field_name):
+            custom_fields = post.get('custom_fields', {})
+            field = custom_fields.get(field_name, [])
+            if len(field) >= 1:
+                return field[0]
+            return u''
+
+        self.set_content_type(constants.CONTENT_TYPE_MOVIES)
+
         result = []
         category_id = re_match.group('categoryid')
 
@@ -25,11 +35,15 @@ class Provider(kodimon.AbstractProvider):
             movie_item = VideoItem(post['title'],
                                    create_content_path('play', str(post['id'])),
                                    image=post['thumbnail'])
-            custom_fields = post.get('custom_fields', {})
-            featured_img_all = custom_fields.get('featured_img_all', [])
-            if len(featured_img_all)>=1:
-                movie_item.set_fanart(featured_img_all[0])
+
+            # year
+            year = _read_custom_fields(post, 'Jahr')
+            if year:
+                # There was one case with '2006/2012' as a result. Therefore we split every year.
+                year = year.split('/')[0]
+                movie_item.set_year(year)
                 pass
+            movie_item.set_fanart(_read_custom_fields(post, 'featured_img_all'))
 
             result.append(movie_item)
             pass
