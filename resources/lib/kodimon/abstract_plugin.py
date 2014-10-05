@@ -24,8 +24,11 @@ class AbstractPlugin(object):
     def get_fanart(self):
         return os.path.join(self.get_native_path(), 'fanart.jpg')
 
-    def create_resource_path(self, relative_path):
-        path_comps = relative_path.split('/')
+    def create_resource_path(self, *args):
+        path_comps = []
+        for arg in args:
+            path_comps.extend(arg.split('/'))
+            pass
         path = os.path.join(self.get_native_path(), 'resources', *path_comps)
         return path
 

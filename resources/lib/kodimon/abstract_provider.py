@@ -409,7 +409,7 @@ class AbstractProvider(object):
         """
         raise NotImplementedError()
 
-    def update_container(self, path=None, params=None):
-        raise NotImplementedError()
+    def create_resource_path(self, *args):
+        return self._plugin.create_resource_path(*args)
 
     pass

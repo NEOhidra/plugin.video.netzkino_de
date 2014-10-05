@@ -21,6 +21,16 @@ class BaseItem(object):
         self._info_labels = {}
         pass
 
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+
+    def __unicode__(self):
+        name = self._name
+        path = self._path
+        str = "------------------------------\n'%s'\nPath: %s\nParams: %s\nImage: %s\n------------------------------" % (
+            name, path, self._params, self._image)
+        return str
+
     def set_info(self, info_type, info_value):
         def _check_instance(_info_type):
             if _info_type[1] == list:
