@@ -62,11 +62,8 @@ def create_remove_from_watch_later(plugin, label, base_item):
 
 
 def create_remove_from_search_history(plugin, label, base_item):
-    from . import item_to_json, AbstractProvider
-
-    params = {'item': json.dumps(item_to_json(base_item))}
-
+    from . import AbstractProvider
     return create_run_plugin(plugin,
                              label,
                              [AbstractProvider.PATH_SEARCH, 'remove'],
-                             params=params)
+                             params={'q': base_item.get_name()})

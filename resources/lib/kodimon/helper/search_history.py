@@ -1,7 +1,6 @@
-import datetime
 import hashlib
-from storage import Storage
 
+from storage import Storage
 
 class SearchHistory(Storage):
     def __init__(self, filename, max_items=10):
@@ -17,7 +16,13 @@ class SearchHistory(Storage):
         for key in self._get_ids():
             item = self._get(key)
             if item is not None:
-                result.append(item[0])
+                # clean up old mistakes :)
+                if not isinstance(item[0], basestring):
+                    self._remove(key)
+                    self.sync()
+                else:
+                    result.append(item[0])
+                    pass
             pass
 
         return result

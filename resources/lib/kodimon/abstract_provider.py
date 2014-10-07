@@ -362,8 +362,8 @@ class AbstractProvider(object):
                 return self.on_search(text, path, params, re_match)
             pass
         elif command == 'remove':
-            search_item = json_to_item(params['item'])
-            self._search.remove(search_item.get_name())
+            query = params['q']
+            self._search.remove(query)
             self.refresh_container()
             return True
         elif command == 'query':

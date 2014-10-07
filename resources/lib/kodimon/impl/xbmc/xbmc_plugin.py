@@ -19,6 +19,7 @@ class XbmcPlugin(AbstractPlugin):
         else:
             self._addon = xbmcaddon.Addon()
 
+
         """
         I don't know what xbmc/kodi is doing with a simple uri, but we have to extract the information from the
         sys parameters and re-build our clean uri.
