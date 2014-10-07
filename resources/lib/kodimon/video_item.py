@@ -38,8 +38,8 @@ class VideoItem(BaseItem):
     INFO_VOTES = ('votes', unicode)
     INFO_TRAILER = ('trailer', unicode)
 
-    def __init__(self, name, path, params=None, image=u''):
-        BaseItem.__init__(self, name, path, params, image)
+    def __init__(self, name, uri, image=u''):
+        BaseItem.__init__(self, name, uri, image)
         pass
 
     def set_aired(self, year, month, day):

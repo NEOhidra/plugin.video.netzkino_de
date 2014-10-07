@@ -7,12 +7,10 @@ def run(provider):
     from ... import KodimonException, VideoItem, DirectoryItem, AbstractProvider
 
     plugin = provider.get_plugin()
-    path = plugin.get_path()
-    params = plugin.get_params()
 
     results = None
     try:
-        results = provider.navigate(path, params)
+        results = provider.navigate(plugin.get_path(), plugin.get_params())
     except KodimonException, ex:
         from ... import constants
         log(ex[0], constants.LOG_ERROR)
@@ -53,7 +51,7 @@ def log(text, log_level=2):
 
 
 def _set_resolved_url(plugin, base_item, succeeded=True):
-    list_item = xbmcgui.ListItem(path=base_item.get_url())
+    list_item = xbmcgui.ListItem(path=base_item.get_uri())
     xbmcplugin.setResolvedUrl(plugin.get_handle(), succeeded=succeeded, listitem=list_item)
 
     """
@@ -70,9 +68,6 @@ def _set_resolved_url(plugin, base_item, succeeded=True):
 
 
 def _add_directory(plugin, directory_item, item_count=0):
-    from ... import create_url_from_item
-    url = create_url_from_item(plugin, directory_item)
-
     item = xbmcgui.ListItem(label=directory_item.get_name(),
                             iconImage=u'DefaultFolder.png',
                             thumbnailImage=directory_item.get_image())
@@ -88,16 +83,13 @@ def _add_directory(plugin, directory_item, item_count=0):
         pass
 
     xbmcplugin.addDirectoryItem(handle=plugin.get_handle(),
-                                url=url,
+                                url=directory_item.get_uri(),
                                 listitem=item,
                                 isFolder=True,
                                 totalItems=item_count)
 
 
 def _add_video(plugin, video_item, item_count=0):
-    from ... import create_url_from_item
-    url = create_url_from_item(plugin, video_item)
-
     item = xbmcgui.ListItem(label=video_item.get_name(),
                             iconImage=u'DefaultVideo.png',
                             thumbnailImage=video_item.get_image())
@@ -118,7 +110,7 @@ def _add_video(plugin, video_item, item_count=0):
                  infoLabels=video_item.get_info_labels())
 
     xbmcplugin.addDirectoryItem(handle=plugin.get_handle(),
-                                url=url,
+                                url=video_item.get_uri(),
                                 listitem=item,
                                 totalItems=item_count
     )

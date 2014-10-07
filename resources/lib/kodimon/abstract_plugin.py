@@ -1,4 +1,6 @@
 import os
+import urllib
+import urlparse
 
 
 class AbstractPlugin(object):
@@ -10,9 +12,39 @@ class AbstractPlugin(object):
         """
         object.__init__(self)
 
-        self._plugin_name = plugin_name
+        self._plugin_name = unicode(plugin_name)
         self._plugin_id = plugin_id
+        self._path = None
+        self._params = None
         pass
+
+    def get_path(self):
+        """
+        Returns the relative path (utf-8 decoded) of the plugin.
+        :return:
+        """
+        if not self._path:
+            comps = urlparse.urlparse(self._uri)
+            self._path = urllib.unquote(comps[2]).decode('utf-8')
+            pass
+
+        return self._path
+
+    def get_params(self):
+        """
+        Returns the params (utf-8 decoded) of the uri
+        :return:
+        """
+        if not self._params:
+            self._params = {}
+            comps = urlparse.urlparse(self._uri)
+            _params = dict(urlparse.parse_qsl(comps[4]))
+            for _param in _params:
+                self._params[_param] = _params[_param].decode('utf-8')
+                pass
+            pass
+
+        return self._params
 
     def get_data_path(self):
         raise NotImplementedError()
@@ -31,10 +63,7 @@ class AbstractPlugin(object):
         path = os.path.join(self.get_native_path(), 'resources', *path_comps)
         return path
 
-    def get_path(self):
-        raise NotImplementedError()
-
-    def get_params(self):
+    def get_uri(self):
         raise NotImplementedError()
 
     def get_name(self):

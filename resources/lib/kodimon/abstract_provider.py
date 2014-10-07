@@ -51,7 +51,9 @@ class AbstractProvider(object):
         self._cache = FunctionCache(os.path.join(cache_path, u'cache.db'))
 
         import constants
-        max_search_history_items = self._plugin.get_settings().get_int(constants.SETTING_SEARCH_SIZE, 50, lambda x: x * 10)
+
+        max_search_history_items = self._plugin.get_settings().get_int(constants.SETTING_SEARCH_SIZE, 50,
+                                                                       lambda x: x * 10)
         self._search = SearchHistory(os.path.join(cache_path, u'search.db'), max_search_history_items)
         self._favorites = FavoriteList(os.path.join(cache_path, u'favorites.db'))
         self._watch_later = WatchLaterList(os.path.join(cache_path, u'watch_later.db'))
@@ -208,7 +210,6 @@ class AbstractProvider(object):
             pass
 
         from . import KodimonException
-
         raise KodimonException("Mapping for path '%s' not found" % path)
 
     def on_search(self, search_text, path, params, re_match):
@@ -349,7 +350,7 @@ class AbstractProvider(object):
         :param re_match:
         :return:
         """
-        from . import create_content_path, json_to_item, DirectoryItem, SearchItem
+        from . import json_to_item, DirectoryItem
 
         command = re_match.group('command')
         if command == 'new' or (command == 'list' and self._search.is_empty()):
@@ -357,43 +358,44 @@ class AbstractProvider(object):
 
             result, text = input.on_keyboard_input(self.localize(self.LOCAL_SEARCH_TITLE))
             if result:
-                search_item = SearchItem(text,
-                                         image=self.get_plugin().create_resource_path('media/search.png'))
-                search_item.set_fanart(self.get_plugin().get_fanart())
-                self._search.update(search_item)
+                self._search.update(text)
                 return self.on_search(text, path, params, re_match)
             pass
         elif command == 'remove':
             search_item = json_to_item(params['item'])
-            self._search.remove(search_item)
+            self._search.remove(search_item.get_name())
             self.refresh_container()
             return True
         elif command == 'query':
-            search_item = json_to_item(params['item'])
-            self._search.update(search_item)
-            return self.on_search(search_item.get_name(), path, params, re_match)
+            query = params['q']
+            self._search.update(query)
+            return self.on_search(query, path, params, re_match)
         else:
             result = []
 
             # 'New Search...'
             search_item = DirectoryItem('[B]' + self.localize(self.LOCAL_SEARCH_NEW) + '[/B]',
-                                        create_content_path(self.PATH_SEARCH, 'new'),
+                                        self.create_plugin_uri([self.PATH_SEARCH, 'new']),
                                         image=self.get_plugin().create_resource_path('media/search.png'))
             search_item.set_fanart(self.get_plugin().get_fanart())
             result.append(search_item)
 
             from . import contextmenu
+            for search in self._search.list():
+                # little fallback for old history entries
+                if isinstance(search, DirectoryItem):
+                    search = search.get_name()
+                    pass
 
-            for search_item in self._search.list():
                 # we create a new instance of the SearchItem
-                new_search_item = SearchItem(search_item.get_name(),
-                                             image=self.get_plugin().create_resource_path('media/search.png'),
-                                             search_type='query')
+                search_item = DirectoryItem(search,
+                                            self.create_plugin_uri([self.PATH_SEARCH, 'query'], {'q': search}),
+                                            image=self.create_resource_path('media/search.png'))
                 context_menu = [contextmenu.create_remove_from_search_history(self._plugin,
                                                                               self.localize(self.LOCAL_SEARCH_REMOVE),
                                                                               search_item)]
-                new_search_item.set_context_menu(context_menu)
-                result.append(new_search_item)
+                search_item.set_context_menu(context_menu)
+                result.append(search_item)
                 pass
             return result, {self.RESULT_CACHE_TO_DISC: False}
 
@@ -409,5 +411,10 @@ class AbstractProvider(object):
 
     def create_resource_path(self, *args):
         return self._plugin.create_resource_path(*args)
+
+    def create_plugin_uri(self, path=None, params=None):
+        from . import create_plugin_uri
+
+        return create_plugin_uri(self._plugin, path, params)
 
     pass
