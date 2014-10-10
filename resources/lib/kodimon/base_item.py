@@ -2,14 +2,15 @@ import hashlib
 
 
 class BaseItem(object):
+    VERSION = 2
     INFO_DATE = ('data', unicode)
     INFO_DATEADDED = ('dateadded', unicode)
 
     def __init__(self, name, uri, image=u''):
+        self._version = BaseItem.VERSION
         self._name = unicode(name)
         self._uri = unicode(uri)
         self._image = ""
-        self._url = ""
         self._fanart = ""
         self._context_menu = None
         self.set_image(image)
