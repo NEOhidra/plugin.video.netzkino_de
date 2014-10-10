@@ -179,7 +179,7 @@ def parse_iso_8601(iso_8601_string):
 
     result = {}
 
-    _data = iso_8601_string.split('T')
+    _data = re.split('T| ', iso_8601_string)
     result.update(_parse_date(_data[0]))
     if len(_data) > 1:
         result.update(_parse_time(_data[1]))

@@ -375,7 +375,7 @@ class AbstractProvider(object):
 
             # 'New Search...'
             search_item = DirectoryItem('[B]' + self.localize(self.LOCAL_SEARCH_NEW) + '[/B]',
-                                        self.create_plugin_uri([self.PATH_SEARCH, 'new']),
+                                        self.create_uri([self.PATH_SEARCH, 'new']),
                                         image=self.get_plugin().create_resource_path('media/search.png'))
             search_item.set_fanart(self.get_plugin().get_fanart())
             result.append(search_item)
@@ -389,7 +389,7 @@ class AbstractProvider(object):
 
                 # we create a new instance of the SearchItem
                 search_item = DirectoryItem(search,
-                                            self.create_plugin_uri([self.PATH_SEARCH, 'query'], {'q': search}),
+                                            self.create_uri([self.PATH_SEARCH, 'query'], {'q': search}),
                                             image=self.create_resource_path('media/search.png'))
                 context_menu = [contextmenu.create_remove_from_search_history(self._plugin,
                                                                               self.localize(self.LOCAL_SEARCH_REMOVE),
@@ -412,7 +412,7 @@ class AbstractProvider(object):
     def create_resource_path(self, *args):
         return self._plugin.create_resource_path(*args)
 
-    def create_plugin_uri(self, path=None, params=None):
+    def create_uri(self, path=None, params=None):
         from . import create_plugin_uri
 
         return create_plugin_uri(self._plugin, path, params)
