@@ -6,10 +6,19 @@ __author__ = 'bromix'
 
 
 class Storage(object):
-    def __init__(self, filename, max_item_count=1000):
+    def __init__(self, filename, max_item_count=1000, max_file_size_kb=-1):
         self._filename = filename
         self._file = None
         self._max_item_count = max_item_count
+        self._max_file_size_kb = max_file_size_kb
+        pass
+
+    def set_max_item_count(self, max_item_count):
+        self._max_item_count = max_item_count
+        pass
+
+    def set_max_file_size_kb(self, max_file_size_kb):
+        self._max_file_size_kb = max_file_size_kb
         pass
 
     def __del__(self):
@@ -17,11 +26,43 @@ class Storage(object):
             self._file.sync()
             self._file.close()
             self._file = None
+
+            self._optimize_file_size()
+            pass
+        pass
+
+    def _optimize_file_size(self):
+        if self._max_file_size_kb>0:
+            file_size_kb = 0
+
+            # collect all files which will match the beginning of the filename
+            collected_files = []
+            path = os.path.dirname(self._filename)
+            filename = os.path.basename(self._filename)
+            files = os.listdir(path)
+            for test_file in files:
+                if test_file.startswith(filename):
+                    test_file = os.path.join(path, test_file)
+                    if os.path.isfile(test_file):
+                        collected_files.append(test_file)
+                        file_size_kb += os.path.getsize(test_file) / 1024
+                        pass
+                    pass
+                pass
+
+            # if the file size exceeds the allowed max file size we delete all collected files
+            if file_size_kb >= self._max_file_size_kb:
+                for collected_file in collected_files:
+                    os.remove(collected_file)
+                    pass
+                pass
             pass
         pass
 
     def _open(self):
         if self._file is None:
+            self._optimize_file_size()
+
             path = os.path.dirname(self._filename)
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -40,10 +81,10 @@ class Storage(object):
         self._open()
         now = time.time()
         self._file[item_id] = (item, now)
-        self._optimize()
+        self._optimize_item_count()
         pass
 
-    def _optimize(self):
+    def _optimize_item_count(self):
         def _sort(x):
             return x[1][1]
 

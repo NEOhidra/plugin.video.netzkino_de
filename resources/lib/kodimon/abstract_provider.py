@@ -46,17 +46,19 @@ class AbstractProvider(object):
 
         # initialize class for caching results of functions
         from helper import FunctionCache, SearchHistory, FavoriteList, WatchLaterList
-
-        cache_path = os.path.join(self._plugin.get_data_path(), u'kodimon')
-        self._cache = FunctionCache(os.path.join(cache_path, u'cache.db'))
-
         import constants
 
+        # initialize cache
+        cache_path = os.path.join(self._plugin.get_data_path(), u'kodimon')
+        max_cache_size_mb = self._plugin.get_settings().get_int(constants.SETTING_CACHE_SIZE, 5)
+        self._cache = FunctionCache(os.path.join(cache_path, u'cache'), max_file_size_kb=max_cache_size_mb*1024)
+
+        # initialize search history
         max_search_history_items = self._plugin.get_settings().get_int(constants.SETTING_SEARCH_SIZE, 50,
                                                                        lambda x: x * 10)
-        self._search = SearchHistory(os.path.join(cache_path, u'search.db'), max_search_history_items)
-        self._favorites = FavoriteList(os.path.join(cache_path, u'favorites.db'))
-        self._watch_later = WatchLaterList(os.path.join(cache_path, u'watch_later.db'))
+        self._search = SearchHistory(os.path.join(cache_path, u'search'), max_search_history_items)
+        self._favorites = FavoriteList(os.path.join(cache_path, u'favorites'))
+        self._watch_later = WatchLaterList(os.path.join(cache_path, u'watch_later'))
 
         # map for regular expression (path) to method (names)
         self._dict_path = {}
@@ -98,6 +100,12 @@ class AbstractProvider(object):
                                self.LOCAL_WATCH_LATER_ADD: 30107,
                                self.LOCAL_WATCH_LATER_REMOVE: 30108,
                                self.LOCAL_LATEST_VIDEOS: 30109})
+        pass
+
+    def shut_down(self):
+        self._search = None
+        self._cache = None
+        self._watch_later = None
         pass
 
     def get_search_history(self):

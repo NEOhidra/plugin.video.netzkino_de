@@ -29,6 +29,8 @@ def run(provider):
     else:
         # handle exception
         pass
+
+    provider.shut_down()
     pass
 
 

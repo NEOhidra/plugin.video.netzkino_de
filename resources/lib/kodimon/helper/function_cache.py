@@ -11,8 +11,8 @@ class FunctionCache(Storage):
     ONE_WEAK = 7 * ONE_DAY
     ONE_MONTH = 4 * ONE_WEAK
 
-    def __init__(self, filename):
-        Storage.__init__(self, filename)
+    def __init__(self, filename, max_file_size_kb=-1):
+        Storage.__init__(self, filename, max_file_size_kb=max_file_size_kb)
         pass
 
     def _create_id_from_func(self, partial_func):
