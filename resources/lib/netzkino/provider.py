@@ -141,7 +141,7 @@ class Provider(kodimon.AbstractProvider):
             watch_later_item = DirectoryItem('[B]'+self.localize(self.LOCAL_WATCH_LATER)+'[/B]',
                                              self.create_uri([self.PATH_WATCH_LATER, 'list']),
                                              image=self.create_resource_path('media', 'watch_later.png'))
-            watch_later_item.set_fanart(self._plugin.get_fanart())
+            watch_later_item.set_fanart(self.get_fanart())
             result.append(watch_later_item)
             pass
 
@@ -150,7 +150,7 @@ class Provider(kodimon.AbstractProvider):
                                     self.create_uri([self.PATH_SEARCH, 'list']),
                                     image=self.create_resource_path('media', 'search.png')
                                     )
-        search_item.set_fanart(self._plugin.get_fanart())
+        search_item.set_fanart(self.get_fanart())
         result.append(search_item)
 
         # "Neu bei Netzkino"
@@ -159,7 +159,7 @@ class Provider(kodimon.AbstractProvider):
         category_item = DirectoryItem(u'[B]Neu bei Netzkino[/B]',
                                       self.create_uri(['category', category_id]),
                                       image=image)
-        category_item.set_fanart(self._plugin.get_fanart())
+        category_item.set_fanart(self.get_fanart())
         result.append(category_item)
 
         # categories
@@ -170,10 +170,13 @@ class Provider(kodimon.AbstractProvider):
             category_item = DirectoryItem(category['title'],
                                           self.create_uri(['category', category_id]),
                                           image=image)
-            category_item.set_fanart(self._plugin.get_fanart())
+            category_item.set_fanart(self.get_fanart())
             result.append(category_item)
             pass
 
         return result, {self.RESULT_CACHE_TO_DISC: False}
+
+    def get_fanart(self):
+        return self.create_resource_path('media', 'fanart.jpg')
 
     pass
