@@ -1,6 +1,7 @@
 import hashlib
 import os
 import re
+import time
 
 
 class AbstractProvider(object):
@@ -195,17 +196,6 @@ class AbstractProvider(object):
         :return:
         """
         return self._plugin
-
-    def call_function_cached(self, partial_func, seconds, return_cached_only=False):
-        """
-        Use this method to cache the result of a (partial) given method.
-        :param partial_func:
-        :param seconds: Time to live.
-        :param return_cached_only: if True returns only a cached result without calling the given method.
-        :return:
-        """
-        return self._cache.get(partial_func=partial_func, seconds=seconds,
-                               return_cached_only=return_cached_only)
 
     def set_content_type(self, content_type):
         """
@@ -406,7 +396,13 @@ class AbstractProvider(object):
             result, text = input.on_keyboard_input(self.localize(self.LOCAL_SEARCH_TITLE))
             if result:
                 self._search.update(text)
-                return self.on_search(text, path, params, re_match)
+
+                # we adjust the path and params as would it be a normal query
+                new_path = self.PATH_SEARCH+'/query/'
+                new_params = {}
+                new_params.update(params)
+                new_params['q'] = text
+                return self.on_search(text, new_path, new_params, re_match)
             pass
         elif command == 'remove':
             query = params['q']
@@ -450,6 +446,9 @@ class AbstractProvider(object):
 
         return False
 
+    def handle_exception(self, exception_to_handle):
+        return True
+
     def refresh_container(self):
         """
         Needs to be implemented by a mock for testing or the real deal.
@@ -457,6 +456,15 @@ class AbstractProvider(object):
         :return:
         """
         raise NotImplementedError()
+
+    def show_notification(self, message, header='', image_uri='', time_milliseconds=5000):
+        raise NotImplementedError()
+
+    def log(self, text, log_level=2):
+        from . import log
+        log_line = '[%s] %s' % (self.get_plugin().get_id(), text)
+        log(log_line, log_level)
+        pass
 
     def create_resource_path(self, *args):
         return self._plugin.create_resource_path(*args)
@@ -466,73 +474,12 @@ class AbstractProvider(object):
 
         return create_plugin_uri(self._plugin, path, params)
 
-    def has_login_credentials(self):
+    def get_access_manager(self):
         """
-        Returns True if we have a username and password.
-        :return: True if username and password exists
+        Returns an AccessManager to help with credentials and access_tokens
+        :return: AccessManager
         """
-        from abstract_settings import AbstractSettings
-
-        settings = self.get_plugin().get_settings()
-        username = settings.get_string(AbstractSettings.LOGIN_USERNAME, '')
-        password = settings.get_string(AbstractSettings.LOGIN_PASSWORD, '')
-        return username != '' and password != ''
-
-    def get_login_credentials(self):
-        """
-        Returns the username and password (Tuple)
-        :return: (username, password)
-        """
-        from abstract_settings import AbstractSettings
-
-        settings = self.get_plugin().get_settings()
-        username = settings.get_string(AbstractSettings.LOGIN_USERNAME, '')
-        password = settings.get_string(AbstractSettings.LOGIN_PASSWORD, '')
-        return username, password
-
-    def is_new_login_credential(self, update_hash=True):
-        """
-        Returns True if username or/and password are new.
-        :return:
-        """
-        from abstract_settings import AbstractSettings
-
-        settings = self.get_plugin().get_settings()
-        username = settings.get_string(AbstractSettings.LOGIN_USERNAME, '')
-        password = settings.get_string(AbstractSettings.LOGIN_PASSWORD, '')
-
-        m = hashlib.md5()
-        m.update(username.encode('utf-8')+password.encode('utf-8'))
-        current_hash = m.hexdigest()
-        old_hash = settings.get_string(AbstractSettings.LOGIN_HASH, '')
-        if current_hash != old_hash:
-            if update_hash:
-                settings.set_string(AbstractSettings.LOGIN_HASH, current_hash)
-                pass
-            return True
-
-        return False
-
-    def get_access_token(self):
-        """
-        Returns the access token for some API
-        :return: access_token
-        """
-        from abstract_settings import AbstractSettings
-
-        settings = self.get_plugin().get_settings()
-        return settings.get_string(AbstractSettings.ACCESS_TOKEN, '')
-
-    def update_access_token(self, access_token):
-        """
-        Updates the old access token with the new one.
-        :param access_token:
-        :return:
-        """
-        from abstract_settings import AbstractSettings
-
-        settings = self.get_plugin().get_settings()
-        settings.set_string(AbstractSettings.ACCESS_TOKEN, access_token)
-        pass
+        from helper import AccessManager
+        return AccessManager(self._plugin.get_settings())
 
     pass
