@@ -40,7 +40,6 @@ class AbstractProvider(object):
         # if no plugin is given (should be default) we create our own implementation
         if plugin is None:
             from . import Plugin
-
             self._plugin = Plugin()
         else:
             self._plugin = plugin
@@ -103,6 +102,9 @@ class AbstractProvider(object):
                                self.LOCAL_WATCH_LATER_REMOVE: 30108,
                                self.LOCAL_LATEST_VIDEOS: 30109})
         pass
+
+    def get_id(self):
+        return self._plugin.get_id()
 
     def shut_down(self):
         self._search = None
