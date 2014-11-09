@@ -12,6 +12,7 @@ class Provider(kodimon.AbstractProvider):
         kodimon.AbstractProvider.__init__(self, plugin)
 
         from . import Client
+
         self._client = Client()
         pass
 
@@ -29,7 +30,7 @@ class Provider(kodimon.AbstractProvider):
                                image=post['thumbnail'])
 
         # stars
-        stars =  _read_custom_fields(post, 'Stars')
+        stars = _read_custom_fields(post, 'Stars')
         if stars:
             stars = stars.split(',')
             for star in stars:
@@ -72,9 +73,8 @@ class Provider(kodimon.AbstractProvider):
         movie_item.set_plot(plot)
 
         # date added - in this case date modified (why?!?!)
-        date = kodimon.parse_iso_8601(post['modified'])
-        movie_item.set_date_added(date['year'], date['month'], date['day'], date['hour'], date['minute'], date['second'])
-        movie_item.set_date(date['year'], date['month'], date['day'])
+        date = kodimon.iso8601.parse(post['modified'])
+        movie_item.set_date(date.year, date.month, date.day)
 
         # context menu
         ctx_menu = [contextmenu.create_add_to_watch_later(self._plugin,
@@ -137,7 +137,7 @@ class Provider(kodimon.AbstractProvider):
 
         # watch later
         if len(self._watch_later.list()) > 0:
-            watch_later_item = DirectoryItem('[B]'+self.localize(self.LOCAL_WATCH_LATER)+'[/B]',
+            watch_later_item = DirectoryItem('[B]' + self.localize(self.LOCAL_WATCH_LATER) + '[/B]',
                                              self.create_uri([self.PATH_WATCH_LATER, 'list']),
                                              image=self.create_resource_path('media', 'watch_later.png'))
             watch_later_item.set_fanart(self.get_fanart())
@@ -145,10 +145,10 @@ class Provider(kodimon.AbstractProvider):
             pass
 
         # search
-        search_item = DirectoryItem('[B]'+self.localize(self.LOCAL_SEARCH)+'[/B]',
+        search_item = DirectoryItem('[B]' + self.localize(self.LOCAL_SEARCH) + '[/B]',
                                     self.create_uri([self.PATH_SEARCH, 'list']),
                                     image=self.create_resource_path('media', 'search.png')
-                                    )
+        )
         search_item.set_fanart(self.get_fanart())
         result.append(search_item)
 
