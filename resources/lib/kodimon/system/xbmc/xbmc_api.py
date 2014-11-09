@@ -1,7 +1,11 @@
-import xbmc
 import xbmcgui
 import xbmcplugin
+
 from ..info_labels import create_info_labels_from_item
+from ...exceptions import KodimonException
+from ...constants import *
+from ...items import *
+from ...abstract_provider import AbstractProvider
 
 
 def run(provider):
@@ -10,8 +14,6 @@ def run(provider):
     :param provider:
     :return:
     """
-    from ... import KodimonException, VideoItem, AudioItem, DirectoryItem, AbstractProvider
-
     plugin = provider.get_plugin()
 
     results = None
@@ -19,9 +21,7 @@ def run(provider):
         results = provider.navigate(plugin.get_path(), plugin.get_params())
     except KodimonException, ex:
         if provider.handle_exception(ex):
-            from ... import constants
-
-            provider.log(ex.message, constants.LOG_ERROR)
+            provider.log(ex.message, LOG_ERROR)
             xbmcgui.Dialog().ok("Exception in ContentProvider", ex.__str__())
             pass
         return

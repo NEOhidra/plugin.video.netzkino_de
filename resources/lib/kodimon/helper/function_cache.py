@@ -9,8 +9,8 @@ class FunctionCache(Storage):
     ONE_MINUTE = 60
     ONE_HOUR = 60 * ONE_MINUTE
     ONE_DAY = 24 * ONE_HOUR
-    ONE_WEAK = 7 * ONE_DAY
-    ONE_MONTH = 4 * ONE_WEAK
+    ONE_WEEK = 7 * ONE_DAY
+    ONE_MONTH = 4 * ONE_WEEK
 
     def __init__(self, filename, max_file_size_kb=-1):
         Storage.__init__(self, filename, max_file_size_kb=max_file_size_kb)
