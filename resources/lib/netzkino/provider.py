@@ -91,20 +91,20 @@ class Provider(kodion.AbstractProvider):
         pass
 
     def on_search(self, search_text, context, re_match):
-        self._set_content_and_sort()
+        self._set_content_and_sort(context)
 
         result = []
 
         json_data = context.get_function_cache().get(FunctionCache.ONE_MINUTE, self._client.search, search_text)
         posts = json_data['posts']
         for post in posts:
-            result.append(self._create_video_item_from_post(post))
+            result.append(self._create_video_item_from_post(post, context))
             pass
 
         return result, {self.RESULT_CACHE_TO_DISC: False}
 
-    def on_watch_later(self, path, params, re_match):
-        self._set_content_and_sort()
+    def on_watch_later(self, context, re_match):
+        self._set_content_and_sort(context)
         pass
 
     @kodion.RegisterProviderPath('^/play/?$')

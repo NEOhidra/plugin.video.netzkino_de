@@ -15,7 +15,7 @@ from .xbmc_context_ui import XbmcContextUI
 
 class XbmcContext(AbstractContext):
     def __init__(self, path=u'/', params=None, plugin_name=u'', plugin_id=u''):
-        AbstractContext.__init__(self, plugin_name, plugin_id)
+        AbstractContext.__init__(self, path, params, plugin_name, plugin_id)
 
         if plugin_id:
             self._addon = xbmcaddon.Addon(id=plugin_id)

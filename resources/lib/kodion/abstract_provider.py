@@ -124,16 +124,14 @@ class AbstractProvider(object):
 
         command = re_match.group('command')
         if command == 'add':
-            from . import from_json
-
             fav_item = from_json(params['item'])
-            self._favorite_list.add(fav_item)
+            context.get_favorite_list().add(fav_item)
             pass
         elif command == 'remove':
             from . import from_json
 
             fav_item = from_json(params['item'])
-            self._favorite_list.remove(fav_item)
+            context.get_favorite_list().remove(fav_item)
             context.get_ui().refresh_container()
             pass
         elif command == 'list':
@@ -167,17 +165,13 @@ class AbstractProvider(object):
 
         command = re_match.group('command')
         if command == 'add':
-            from . import from_json
-
             item = from_json(params['item'])
-            self._watch_later_list.add(item)
+            context.get_watch_later_list().add(item)
             pass
         elif command == 'remove':
-            from . import from_json
-
             item = from_json(params['item'])
-            self._watch_later_list.remove(item)
-            self.refresh_container()
+            context.get_watch_later_list().remove(item)
+            context.get_ui().refresh_container()
             pass
         elif command == 'list':
             video_items = context.get_watch_later_list().list()
@@ -251,8 +245,8 @@ class AbstractProvider(object):
                                             context.create_uri([constants.paths.SEARCH, 'query'], {'q': search}),
                                             image=context.create_resource_path('media/search.png'))
                 search_item.set_fanart(context.get_fanart())
-                context_menu = (context.localize(constants.localize.SEARCH_REMOVE),
-                                build_in_functions.run_plugin_remove_from_search_history(context, search_item))
+                context_menu = [(context.localize(constants.localize.SEARCH_REMOVE),
+                                build_in_functions.run_plugin_remove_from_search_history(context, search_item))]
                 search_item.set_context_menu(context_menu)
                 result.append(search_item)
                 pass
