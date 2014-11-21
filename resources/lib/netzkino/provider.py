@@ -176,6 +176,9 @@ class Provider(kodion.AbstractProvider):
 
         return result, {self.RESULT_CACHE_TO_DISC: False}
 
+    def get_alternative_fanart(self, context):
+        return self.get_fanart(context)
+
     def get_fanart(self, context):
         return context.create_resource_path('media', 'fanart.jpg')
 
