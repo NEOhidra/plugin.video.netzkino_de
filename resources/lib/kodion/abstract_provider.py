@@ -1,7 +1,7 @@
 import re
 
 from .exceptions import KodimonException
-from .items import *
+from . import items
 from . import constants
 from .utils import build_in_functions
 
@@ -124,13 +124,11 @@ class AbstractProvider(object):
 
         command = re_match.group('command')
         if command == 'add':
-            fav_item = from_json(params['item'])
+            fav_item = items.from_json(params['item'])
             context.get_favorite_list().add(fav_item)
             pass
         elif command == 'remove':
-            from . import from_json
-
-            fav_item = from_json(params['item'])
+            fav_item = items.from_json(params['item'])
             context.get_favorite_list().remove(fav_item)
             context.get_ui().refresh_container()
             pass
@@ -165,11 +163,11 @@ class AbstractProvider(object):
 
         command = re_match.group('command')
         if command == 'add':
-            item = from_json(params['item'])
+            item = items.from_json(params['item'])
             context.get_watch_later_list().add(item)
             pass
         elif command == 'remove':
-            item = from_json(params['item'])
+            item = items.from_json(params['item'])
             context.get_watch_later_list().remove(item)
             context.get_ui().refresh_container()
             pass
@@ -228,25 +226,25 @@ class AbstractProvider(object):
             result = []
 
             # 'New Search...'
-            search_item = DirectoryItem('[B]' + context.localize(constants.localize.SEARCH_NEW) + '[/B]',
-                                        context.create_uri([constants.paths.SEARCH, 'new']),
-                                        image=context.create_resource_path('media/search.png'))
+            search_item = items.DirectoryItem('[B]' + context.localize(constants.localize.SEARCH_NEW) + '[/B]',
+                                              context.create_uri([constants.paths.SEARCH, 'new']),
+                                              image=context.create_resource_path('media/search.png'))
             search_item.set_fanart(context.get_fanart())
             result.append(search_item)
 
             for search in search_history.list():
                 # little fallback for old history entries
-                if isinstance(search, DirectoryItem):
+                if isinstance(search, items.DirectoryItem):
                     search = search.get_name()
                     pass
 
                 # we create a new instance of the SearchItem
-                search_item = DirectoryItem(search,
-                                            context.create_uri([constants.paths.SEARCH, 'query'], {'q': search}),
-                                            image=context.create_resource_path('media/search.png'))
+                search_item = items.DirectoryItem(search,
+                                                  context.create_uri([constants.paths.SEARCH, 'query'], {'q': search}),
+                                                  image=context.create_resource_path('media/search.png'))
                 search_item.set_fanart(context.get_fanart())
                 context_menu = [(context.localize(constants.localize.SEARCH_REMOVE),
-                                build_in_functions.run_plugin_remove_from_search_history(context, search_item))]
+                                 build_in_functions.run_plugin_remove_from_search_history(context, search_item))]
                 search_item.set_context_menu(context_menu)
                 result.append(search_item)
                 pass

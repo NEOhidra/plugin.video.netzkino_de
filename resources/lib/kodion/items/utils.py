@@ -10,20 +10,21 @@ from .audio_item import AudioItem
 from .image_item import ImageItem
 
 
-def create_next_page_item(context, current_page, path, params=None):
-    """
-    Creates a default next page item based on the current path.
-    :param current_page: current page index (int)
-    :param path: current path
-    :param params:
-    :return:
-    """
-    if not params:
-        params = {}
+def create_search_item(context, alt_name=None, image=u''):
+    name = alt_name
+    if not name:
+        name = '[B]' + context.localize(constants.localize.SEARCH) + '[/B]'
         pass
 
+    search_item = DirectoryItem(name,
+                                context.create_uri([constants.paths.SEARCH, 'list']),
+                                image=image)
+    return search_item
+    pass
+
+def create_next_page_item(context, current_page):
     new_params = {}
-    new_params.update(params)
+    new_params.update(context.get_params())
     new_params['page'] = unicode(current_page + 1)
     name = context.localize(constants.localize.NEXT_PAGE, 'Next Page')
     if name.find('%d') != -1:
@@ -32,7 +33,7 @@ def create_next_page_item(context, current_page, path, params=None):
 
     from . import DirectoryItem
 
-    return DirectoryItem(name, context.create_uri(path, new_params))
+    return DirectoryItem(name, context.create_uri(context.get_path(), new_params))
 
 
 def from_json(json_data):

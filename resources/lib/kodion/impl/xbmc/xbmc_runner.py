@@ -21,7 +21,7 @@ class XbmcRunner(AbstractProviderRunner):
             results = provider.navigate(context)
         except KodimonException, ex:
             if provider.handle_exception(ex):
-                provider.log(ex.message, constants.log.ERROR)
+                context.log_error(ex.__str__())
                 xbmcgui.Dialog().ok("Exception in ContentProvider", ex.__str__())
                 pass
             return
