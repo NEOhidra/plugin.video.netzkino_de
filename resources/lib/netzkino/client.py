@@ -1,20 +1,8 @@
-# import json
-import json
 import urllib
-import urllib2
-
-import requests
-# Verify is disabled and to avoid warnings we disable the warnings. Behind a proxy request isn't working correctly all
-# the time and if so can't validate the hosts correctly resulting in a exception and the addon won't work properly.
-try:
-    from requests.packages import urllib3
-
-    urllib3.disable_warnings()
-except:
-    # do nothing
-    pass
 
 __author__ = 'bromix'
+
+from resources.lib.kodion import simple_requests as requests
 
 
 class Client(object):
@@ -96,10 +84,9 @@ class Client(object):
         :param stream_id:
         :return:
         """
-        content = urllib2.urlopen('http://www.netzkino.de/adconf/android-new.php')
-        json_data = json.load(content)
+        content = requests.get('http://www.netzkino.de/adconf/android-new.php')
+        json_data = content.json()
         streamer_url = json_data.get('streamer', 'http://netzkino_and-vh.akamaihd.net/i/')
         return streamer_url + urllib.quote(stream_id.encode('utf-8')) + '.mp4/master.m3u8'
-
 
     pass

@@ -1,10 +1,10 @@
-from resources.lib.kodion.items import DirectoryItem, VideoItem
+from resources.lib.kodion.items import DirectoryItem, VideoItem, UriItem
 
 __author__ = 'bromix'
 
 from resources.lib import kodion
 from resources.lib.kodion import constants, iso8601
-from resources.lib.kodion.utils import FunctionCache, build_in_functions
+from resources.lib.kodion.utils import FunctionCache
 
 
 class Provider(kodion.AbstractProvider):
@@ -15,6 +15,9 @@ class Provider(kodion.AbstractProvider):
 
         self._client = Client()
         pass
+
+    def get_wizard_supported_views(self):
+        return ['default', 'movies']
 
     def _create_video_item_from_post(self, post, context):
         def _read_custom_fields(_post, field_name):
@@ -78,7 +81,8 @@ class Provider(kodion.AbstractProvider):
 
         # context menu
         ctx_menu = [(context.localize(constants.localize.WATCH_LATER_ADD),
-                    build_in_functions.run_plugin_add_to_watch_later(context, movie_item))]
+                     'RunPlugin(%s)' % context.create_uri([constants.paths.WATCH_LATER, 'add'],
+                                                          {'item': kodion.items.to_jsons(movie_item)}))]
         movie_item.set_context_menu(ctx_menu)
         return movie_item
 
@@ -113,9 +117,8 @@ class Provider(kodion.AbstractProvider):
         stream_id = params['stream_id']
 
         stream_url = self._client.get_video_url(stream_id)
-        movie_item = VideoItem(stream_id,
-                               stream_url)
-        return movie_item
+        uri_item = UriItem(stream_url)
+        return uri_item
 
     @kodion.RegisterProviderPath('^/category/(?P<categoryid>\d+)/?$')
     def _on_category(self, context, re_match):
