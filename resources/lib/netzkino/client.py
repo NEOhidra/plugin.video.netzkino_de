@@ -1,13 +1,42 @@
-import urllib
-
 __author__ = 'bromix'
 
+import urllib
 from resources.lib.kodion import simple_requests as requests
 
 
 class Client(object):
-    def __init__(self):
+    CONFIG_NETZKINO_DE = {
+        'url': 'http://api.netzkino.de.simplecache.net/capi-2.0a/%s',
+        'parent': 0,
+        'new': {
+            'title': 'Neu bei Netzkino',
+            'id': 81
+        },
+        'header': {
+            'Origin': 'http://www.netzkino.de',
+            'Referer': 'http://www.netzkino.de/'
+        }
+    }
+
+    CONFIG_DZANGO_TV = {
+        'url': 'http://hapi.dzango.tv/capi-2.0a/%s',
+        'parent': 271,
+        'new': {
+            'title': 'Neu bei DZANGO.TV',
+            'id': 311
+        },
+        'header': {
+            'Origin': 'http://www.dzango.tv',
+            'Referer': 'http://www.dzango.tv/#!'
+        }
+    }
+
+    def __init__(self, config):
+        self._config = config
         pass
+
+    def get_config(self):
+        return self._config
 
     def _perform_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
                          allow_redirects=True):
@@ -15,26 +44,29 @@ class Client(object):
         if not params:
             params = {}
             pass
-        if path != 'search':
-            _params = {'d': 'android-tablet', 'l': 'de-DE', 'g': 'DE'}
-            pass
-        else:
-            _params = {'d': 'android-phone'}
-            pass
+        _params = {
+            'd': 'wwww',
+            'l': 'de-DE'
+        }
         _params.update(params)
 
         # headers
         if not headers:
             headers = {}
             pass
-        _headers = {'Host': 'api.netzkino.de.simplecache.net',
-                    'User-Agent': 'Dalvik/1.6.0 (Linux; U; Android 4.4.4; GT-I9100 Build/KTU84Q)',
-                    'Connection': 'Keep-Alive',
-                    'Accept-Encoding': 'gzip'}
+        _headers = {'Connection': 'keep-alive',
+                    'Pragma': 'no-cache',
+                    'Cache-Control': 'no-cache',
+                    'Accept': 'application/json, text/javascript, */*; q=0.01',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36',
+                    'DNT': '1',
+                    'Accept-Encoding': 'gzip',
+                    'Accept-Language': 'en-US,en;q=0.8,de;q=0.6'}
+        _headers.update(self._config['header'])
         _headers.update(headers)
 
         # url
-        _url = 'http://api.netzkino.de.simplecache.net/capi-2.0a/%s' % path.strip('/')
+        _url = self._config['url'] % path.strip('/')
 
         result = None
         if method == 'GET':
@@ -59,7 +91,14 @@ class Client(object):
         :return:
         """
         json_data = self.get_home()
-        return json_data.get('categories', {})
+        categories = json_data.get('categories', [])
+        filtered_categories = []
+        for category in categories:
+            if category['parent'] == self._config['parent']:
+                filtered_categories.append(category)
+                pass
+            pass
+        return filtered_categories
 
     def get_category_content(self, category_id):
         """
@@ -68,7 +107,6 @@ class Client(object):
         :return:
         """
         return self._perform_request(path='categories/%s' % str(category_id))
-        pass
 
     def search(self, text):
         """
@@ -77,6 +115,21 @@ class Client(object):
         :return:
         """
         return self._perform_request(path='search', params={'q': text})
+
+    def get_video_url_by_slug(self, slug):
+        result = {}
+        json_data = self._perform_request(path='movies/%s.json' % str(slug))
+        custom_fields = json_data['custom_fields']
+        youtube = custom_fields.get('Youtube', [''])[0]
+        if youtube:
+            result['youtube'] = 'plugin://plugin.video.youtube/play/?video_id=%s' % youtube
+            pass
+        streaming = custom_fields.get('Streaming', [''])[0]
+        if streaming:
+            streamer_url = 'http://netzkino_and-vh.akamaihd.net/i/'
+            result['streaming'] = streamer_url + urllib.quote(streaming.encode('utf-8')) + '.mp4/master.m3u8'
+            pass
+        return result
 
     def get_video_url(self, stream_id):
         """

@@ -1,3 +1,6 @@
+2.2.0 (2015-04-23)
+ADD: support for DZANGO.TV
+
 2.1.0 (2015-03-27)
 UPD: improved support for Gotham, Helix and Isengard
 

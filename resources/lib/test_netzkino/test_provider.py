@@ -1,8 +1,7 @@
-from resources.lib.netzkino import Provider
-
 __author__ = 'bromix'
 
 import unittest
+from resources.lib.netzkino import Provider
 from resources.lib import kodion
 
 class TestProvider(unittest.TestCase):

@@ -1,7 +1,6 @@
-from resources.lib.kodion.items import DirectoryItem, VideoItem, UriItem
-
 __author__ = 'bromix'
 
+from resources.lib.kodion.items import DirectoryItem, VideoItem, UriItem
 from resources.lib import kodion
 from resources.lib.kodion import constants
 from resources.lib.kodion.utils import FunctionCache, datetime_parser
@@ -12,8 +11,7 @@ class Provider(kodion.AbstractProvider):
         kodion.AbstractProvider.__init__(self)
 
         from . import Client
-
-        self._client = Client()
+        self._client = Client(Client.CONFIG_NETZKINO_DE)
         pass
 
     def get_wizard_supported_views(self):
@@ -27,10 +25,10 @@ class Provider(kodion.AbstractProvider):
                 return field[0]
             return u''
 
-        stream_id = _read_custom_fields(post, 'Streaming')
+        slug = post['slug']
         movie_item = VideoItem(post['title'],
-                               context.create_uri('play', {'stream_id': stream_id}),
-                               image=post['thumbnail'])
+                               context.create_uri('play', {'slug': slug}),
+                               image=post.get('thumbnail', ''))
 
         # stars
         stars = _read_custom_fields(post, 'Stars')
@@ -69,7 +67,11 @@ class Provider(kodion.AbstractProvider):
             pass
 
         # fanart
-        movie_item.set_fanart(_read_custom_fields(post, 'featured_img_all'))
+        fanart = _read_custom_fields(post, 'featured_img_all')
+        if not fanart:
+            fanart = self.get_fanart(context)
+            pass
+        movie_item.set_fanart(fanart)
 
         # plot
         plot = kodion.utils.strip_html_from_text(post['content'])
@@ -114,11 +116,16 @@ class Provider(kodion.AbstractProvider):
     @kodion.RegisterProviderPath('^/play/?$')
     def _on_play(self, context, re_match):
         params = context.get_params()
-        stream_id = params['stream_id']
+        slug = params['slug']
 
-        stream_url = self._client.get_video_url(stream_id)
-        uri_item = UriItem(stream_url)
-        return uri_item
+        stream_urls = self._client.get_video_url_by_slug(slug)
+        if 'youtube' in stream_urls:
+            return UriItem(stream_urls['youtube'])
+
+        if 'streaming' in stream_urls:
+            return UriItem(stream_urls['streaming'])
+
+        return False
 
     @kodion.RegisterProviderPath('^/category/(?P<categoryid>\d+)/?$')
     def _on_category(self, context, re_match):
@@ -156,10 +163,12 @@ class Provider(kodion.AbstractProvider):
         search_item.set_fanart(self.get_fanart(context))
         result.append(search_item)
 
-        # "Neu bei Netzkino"
-        category_id = '81'
+        # "Neu bei Netzkino/DZANGO.TV"
+        config = self._client.get_config()
+        category_id = str(config['new']['id'])
         image = 'http://dyn.netzkino.de/wp-content/themes/netzkino/imgs/categories/%s.png' % category_id
-        category_item = DirectoryItem(u'[B]Neu bei Netzkino[/B]',
+
+        category_item = DirectoryItem(u'[B]%s[/B]' % config['new']['title'],
                                       context.create_uri(['category', category_id]),
                                       image=image)
         category_item.set_fanart(self.get_fanart(context))
