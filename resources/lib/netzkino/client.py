@@ -8,6 +8,7 @@ class Client(object):
     CONFIG_NETZKINO_DE = {
         'url': 'http://api.netzkino.de.simplecache.net/capi-2.0a/%s',
         'parent': 0,
+        'category_image_url': 'http://dyn.netzkino.de/wp-content/themes/netzkino/imgs/categories/%s.png',
         'new': {
             'title': 'Neu bei Netzkino',
             'id': 81
@@ -21,6 +22,7 @@ class Client(object):
     CONFIG_DZANGO_TV = {
         'url': 'http://hapi.dzango.tv/capi-2.0a/%s',
         'parent': 271,
+        'category_image_url': '',
         'new': {
             'title': 'Neu bei DZANGO.TV',
             'id': 311

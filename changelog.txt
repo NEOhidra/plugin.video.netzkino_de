@@ -1,4 +1,5 @@
 2.2.0 (2015-04-23)
+ADD: dependency for YouTube 5.0.0
 ADD: support for DZANGO.TV
 
 2.1.0 (2015-03-27)

@@ -1,5 +1,6 @@
 __author__ = 'bromix'
 
+import HTMLParser
 from resources.lib.kodion.items import DirectoryItem, VideoItem, UriItem
 from resources.lib import kodion
 from resources.lib.kodion import constants
@@ -12,6 +13,7 @@ class Provider(kodion.AbstractProvider):
 
         from . import Client
         self._client = Client(Client.CONFIG_NETZKINO_DE)
+        self._html_parser = HTMLParser.HTMLParser()
         pass
 
     def get_wizard_supported_views(self):
@@ -26,7 +28,8 @@ class Provider(kodion.AbstractProvider):
             return u''
 
         slug = post['slug']
-        movie_item = VideoItem(post['title'],
+        title = self._html_parser.unescape(post['title'])
+        movie_item = VideoItem(title,
                                context.create_uri('play', {'slug': slug}),
                                image=post.get('thumbnail', ''))
 
@@ -74,7 +77,8 @@ class Provider(kodion.AbstractProvider):
         movie_item.set_fanart(fanart)
 
         # plot
-        plot = kodion.utils.strip_html_from_text(post['content'])
+        plot = self._html_parser.unescape(post['content'])
+        plot = kodion.utils.strip_html_from_text(plot)
         movie_item.set_plot(plot)
 
         # date added - in this case date modified (why?!?!)
@@ -166,11 +170,12 @@ class Provider(kodion.AbstractProvider):
         # "Neu bei Netzkino/DZANGO.TV"
         config = self._client.get_config()
         category_id = str(config['new']['id'])
-        image = 'http://dyn.netzkino.de/wp-content/themes/netzkino/imgs/categories/%s.png' % category_id
-
         category_item = DirectoryItem(u'[B]%s[/B]' % config['new']['title'],
-                                      context.create_uri(['category', category_id]),
-                                      image=image)
+                                      context.create_uri(['category', category_id]))
+        category_image_url = config['category_image_url']
+        if category_image_url:
+            category_item.set_image(category_image_url % category_id)
+            pass
         category_item.set_fanart(self.get_fanart(context))
         result.append(category_item)
 
@@ -178,10 +183,12 @@ class Provider(kodion.AbstractProvider):
         categories = context.get_function_cache().get(FunctionCache.ONE_DAY, self._client.get_categories)
         for category in categories:
             category_id = str(category['id'])
-            image = 'http://dyn.netzkino.de/wp-content/themes/netzkino/imgs/categories/%s.png' % category_id
             category_item = DirectoryItem(category['title'],
-                                          context.create_uri(['category', category_id]),
-                                          image=image)
+                                          context.create_uri(['category', category_id]))
+            category_image_url = config['category_image_url']
+            if category_image_url:
+                category_item.set_image(category_image_url % category_id)
+                pass
             category_item.set_fanart(self.get_fanart(context))
             result.append(category_item)
             pass
